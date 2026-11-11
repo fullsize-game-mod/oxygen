@@ -18,7 +18,40 @@
 | 产物温度 | 通常为 20°C；冰等低熔点元素在熔点以下生成，最低 1 K |
 | 停机条件 | 断电、自动化红灯、手动禁用等原版运行条件；不受淹没或过热限制 |
 
-选择范围是游戏当前可用的**固体元素**，例如砂岩、铁矿、精炼铁、塑料、冰；不包含食物、种子、装备、动物等实体。生成后仍遵循游戏的自然换热、融化、升华、放射性等规则。
+选择范围是游戏当前可用的**固体元素**，具体名称与限制见下方清单。
+
+## 可生成的固体元素
+
+**本 Mod 没有写死元素白名单。**资源列表使用原版固体选择侧栏；选定资源还必须是当前游戏已加载、未禁用的固态元素，具有可用的掉落物预制体和生成数据，且熔点高于 1 K，才能生产。找不到元素或不满足条件时，建筑会待机。
+
+### 资源参考表
+
+下表按用途整理了公开的 [740622 版本运行时元素导出数据](https://github.com/jastice/oni-material-graph/blob/main/data/catalogs/oni-740622-v11/materials.json)中的固态元素，括号内为游戏内部 ID，便于对照不同语言的名称。**这是参考元素表，不是逐项游戏内实测通过的名单，也不代表未安装 DLC 时全部可用。**部分新元素保留导出数据中的英文名称。
+
+| 类别 | 元素名称（内部 ID） |
+| --- | --- |
+| 岩石与建材 | 砂岩（`SandStone`）、火成岩（`IgneousRock`）、沉积岩（`SedimentaryRock`）、花岗岩（`Granite`）、黑曜石（`Obsidian`）、镁铁质岩（`MaficRock`）、化石（`Fossil`）、陶瓷（`Ceramic`）、碎石（`CrushedRock`） |
+| 土壤与过滤介质 | 泥土（`Dirt`）、粘土（`Clay`）、沙子（`Sand`）、浮土（`Regolith`）、污染土（`ToxicSand`）、泥巴（`Mud`）、污染泥（`ToxicMud`） |
+| 金属矿石 | 铜矿（`Cuprite`）、铁矿（`IronOre`）、金汞齐（`GoldAmalgam`）、铝矿（`AluminumOre`）、黑钨矿（`Wolframite`）、钴矿（`Cobaltite`）、朱砂矿（`Cinnabar`）、镍矿（`NickelOre`）、锌矿（`ZincOre`）、方铅矿（`Galena`） |
+| 精炼金属 | 铜（`Copper`）、铁（`Iron`）、金（`Gold`）、铝（`Aluminum`）、钨（`Tungsten`）、铅（`Lead`）、钴（`Cobalt`）、铌（`Niobium`）、镍（`Nickel`）、铱（`Iridium`）、锌（`Zinc`）、固态汞（`SolidMercury`） |
+| 工业与农业原料 | 煤炭（`Carbon`）、精炼碳（`RefinedCarbon`）、石灰（`Lime`）、磷矿（`Phosphorite`）、精炼磷（`Phosphorus`）、肥料（`Fertilizer`）、盐（`Salt`）、铁锈（`Rust`）、硫（`Sulfur`）、蔗糖（`Sucrose`） |
+| 有机物与可释放气体的资源 | 藻类（`Algae`）、菌泥（`SlimeMold`）、木材（`WoodLog`）、胶合板 / Plywood（`FabricatedWood`）、氧石（`OxyRock`）、漂白石（`BleachStone`）、咸乳蜡（`MilkFat`）、动物脂肪 / Tallow（`Tallow`） |
+| 制造材料与稀有材料 | 钢（`Steel`）、塑料（`Polypropylene`）、塑料质（`HardPolypropylene`）、玻璃（`Glass`）、钻石（`Diamond`）、石墨（`Graphite`）、深渊晶石（`Katairite`）、富勒烯（`Fullerene`）、异构树液（`Isoresin`）、隔热质（`SuperInsulator`）、导热质（`TempConductorSolid`） |
+| 冰雪 | 冰（`Ice`）、污染冰（`DirtyIce`）、盐水冰（`BrineIce`）、污染盐水冰（`MurkyBrineIce`）、雪（`Snow`）、碎冰（`CrushedIce`）、压实雪 / Packed Snow（`StableSnow`） |
+| 其他低温固态资源 | 固态二氧化碳（`SolidCarbonDioxide`）、固态氯（`SolidChlorine`）、固态氢（`SolidHydrogen`）、固态氧（`SolidOxygen`）、固态甲烷（`SolidMethane`）、固态丙烷（`SolidPropane`）、固态乙醇（`SolidEthanol`）、固态原油（`SolidCrudeOil`）、固态石油（`SolidPetroleum`）、固态石脑油（`SolidNaphtha`）、固态超级冷却剂（`SolidSuperCoolant`）、固态粘性凝胶（`SolidViscoGel`） |
+| 其他凝固产物 | 固态树液 / Solid Sap（`SolidResin`）、固态树脂 / Solid Resin（`NaturalSolidResin`）、Solid Gunk（`Gunk`）、Frozen Brackene（`MilkIce`）、Frozen Phyto Oil（`FrozenPhytoOil`）、Frozen Ovolene（`FishMilkIce`）、Frozen Squid Ink（`FrozenInk`）、Frozen Mucin（`SolidMucus`） |
+| 核工业资源 | 铀矿（`UraniumOre`）、浓缩铀（`EnrichedUranium`）、贫铀（`DepletedUranium`）、固态核废料（`SolidNuclearWaste`）、Corium（`Corium`） |
+| 其他版本或 DLC 资源 | 琥珀（`Amber`）、泥炭（`Peat`）、页岩（`Shale`）、玄武岩（`Basalt`）、粉砂岩（`SiltStone`）、Coquina（`Coquina`）、Corallium（`Corallium`）、Gum Wood（`PalmWood`）、珍珠（`Pearl`）、橡胶（`Rubber`） |
+
+导出数据还包含 Bitumen（`Bitumen`）、Genetic Ooze（`Creature`）、Pyrite（`FoolsGold`）、Radium（`Radium`）等特殊条目。**数据中存在不等于侧栏可选或可生产**，这些条目同样受禁用状态、资源侧栏和掉落物检查限制，不承诺可用。
+
+### DLC、其他 Mod 与生成边界
+
+- **实际列表随游戏环境变化**：游戏版本、启用的 DLC 及其他 Mod 都可能改变元素、禁用状态或资源侧栏。上表涉及多个 DLC；本 Mod 不解锁未加载的 DLC 元素，也不强制启用隐藏或测试元素。最终以你游戏中的选择列表及运行条件为准。
+- **其他 Mod 的元素**：新增固态元素若能进入原版资源选择侧栏，并满足上述生成条件，也可使用，不需要为每个 ID 修改白名单。
+- **不生成普通物品实体**：成品食物、种子、蛋、装备、建筑、动物及复制人不属于这里的元素资源。蔗糖、动物脂肪等虽然可以被消耗，但它们在游戏中属于元素，因此与普通食物物品不同。
+- **不直接生成气体或液体**：不能选水、氧气、氢气、液态石油等对应形态；但冰、固态氧、固态氢、固态石油属于各自独立的固态元素，满足条件时可以生成。
+- **生成后仍遵循游戏物理规则**：冰和其他低熔点资源会在熔点以下生成，放进较热环境仍可能融化或汽化；氧石、漂白石等仍可能释放气体，放射性资源仍遵循原版行为。
 
 ## 安装与使用
 
