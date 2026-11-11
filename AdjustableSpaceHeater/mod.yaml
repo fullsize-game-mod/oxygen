@@ -1,0 +1,3 @@
+title: "空间加热器温控"
+description: "空间加热器支持 -200～200°C 双向温控：高于目标制冷，低于目标加热。基础过热温度为 1000°C。"
+staticID: "local.AdjustableSpaceHeater"
