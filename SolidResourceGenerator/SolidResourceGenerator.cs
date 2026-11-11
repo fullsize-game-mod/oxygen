@@ -52,8 +52,7 @@ namespace SolidResourceGenerator
 
             Element element = ElementLoader.GetElement(filterable.SelectedTag);
             // 读档后原资源可能被其他 Mod 移除；拒绝无效元素或没有掉落物预制体的资源。
-            if (element == null || !element.IsSolid || element.disabled || element.substance == null ||
-                !(element.highTemp > 1f) || Assets.TryGetPrefab(element.tag) == null)
+            if (!SolidResourceSupport.IsSupported(filterable.SelectedTag))
             {
                 operational.SetActive(false);
                 return;

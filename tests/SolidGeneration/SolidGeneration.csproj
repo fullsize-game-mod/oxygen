@@ -7,5 +7,7 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="../../SolidResourceGenerator/SolidResourceGenerator.cs" Link="SolidResourceGenerator.cs" />
+    <Compile Include="../../SolidResourceGenerator/SolidResourceSupport.cs" Link="SolidResourceSupport.cs" />
+    <Compile Include="../../SolidResourceGenerator/Patches.cs" Link="Patches.cs" />
   </ItemGroup>
 </Project>

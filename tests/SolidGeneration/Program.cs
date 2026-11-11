@@ -112,7 +112,50 @@ rateField.SetValue(rateGenerator, float.NaN);
 rateGenerator.Spawn();
 Check(rateGenerator.GetSliderValue(0) == 1f, "读档时必须修复无效速度");
 
-Console.WriteLine("PASS: power, adjustable rate, pause, bounds, per-building settings, copy settings, saved-field validation, resource switching, temperature, germs and invalid inputs.");
+var rockCategory = new Tag("Rock");
+var foodCategory = new Tag("Food");
+var eggCategory = new Tag("Eggs");
+var liquidCategory = new Tag("Liquids");
+var food = new Tag("CookedMeat");
+var egg = new Tag("HatchEgg");
+var seed = new Tag("Seed");
+var liquid = new Element { tag = new Tag("Water"), IsSolid = false, highTemp = 373f };
+var disabled = new Element { tag = new Tag("DisabledSolid"), IsSolid = true, disabled = true, highTemp = 1000f };
+var missingPrefab = new Element { tag = new Tag("MissingPrefabSolid"), IsSolid = true, highTemp = 1000f };
+var missingSubstance = new Element { tag = new Tag("MissingSubstanceSolid"), IsSolid = true, highTemp = 1000f, substance = null };
+var invalidTemperature = new Element { tag = new Tag("InvalidTemperatureSolid"), IsSolid = true, highTemp = 1f };
+foreach (var entry in new[] { liquid, disabled, missingPrefab, missingSubstance, invalidTemperature })
+    ElementLoader.Elements[entry.tag] = entry;
+// 物品即使能映射到基础元素，也必须按精确元素 ID 排除。
+ElementLoader.Elements[food] = iron;
+Assets.MissingPrefabs.Add(missingPrefab.tag);
+var originalOptions = new Dictionary<Tag, HashSet<Tag>> {
+    [rockCategory] = new HashSet<Tag> { iron.tag, ice.tag, seed, disabled.tag, missingPrefab.tag, missingSubstance.tag, invalidTemperature.tag },
+    [foodCategory] = new HashSet<Tag> { food },
+    [eggCategory] = new HashSet<Tag> { egg },
+    [liquidCategory] = new HashSet<Tag> { liquid.tag }
+};
+var optionPatch = typeof(SolidResourceGenerator.GeneratorSolidOptionsPatch).GetMethod("Postfix", BindingFlags.NonPublic | BindingFlags.Static);
+var argsForPatch = new object[] { new Filterable { Owner = generator }, originalOptions };
+optionPatch.Invoke(null, argsForPatch);
+var solidOptions = (Dictionary<Tag, HashSet<Tag>>)argsForPatch[1];
+Check(solidOptions.Count == 1 && solidOptions[rockCategory].SetEquals(new[] { iron.tag, ice.tag }),
+    "菜单必须只保留可生成固态元素，并移除食物、蛋、种子、液体及空分类");
+Check(originalOptions.Count == 4 && originalOptions[rockCategory].Contains(seed), "过滤菜单不能修改共用的原始字典或集合");
+solidOptions[rockCategory].Clear();
+Check(originalOptions[rockCategory].Contains(iron.tag), "返回的每个分类集合必须独立");
+argsForPatch = new object[] { new Filterable(), originalOptions };
+optionPatch.Invoke(null, argsForPatch);
+Check(ReferenceEquals(argsForPatch[1], originalOptions), "不能改变其他建筑的选择菜单");
+argsForPatch = new object[] { new Filterable { Owner = generator }, null };
+optionPatch.Invoke(null, argsForPatch);
+Check(((Dictionary<Tag, HashSet<Tag>>)argsForPatch[1]).Count == 0, "空选项表应安全返回空菜单");
+filter.SelectedTag = food;
+baseline = iron.substance.TotalMass;
+generator.Sim200ms(0.2f);
+Check(!operational.IsActive && iron.substance.TotalMass == baseline, "已保存的不支持物品选择也不能生成基础元素");
+
+Console.WriteLine("PASS: existing solid generation checks; solid-only menu, empty categories, invalid resources, exact element identity, shared-list isolation and other-building isolation.");
 
 // 只替代游戏边界，执行的是正式生产组件；不模拟 UI、存档和物理系统。
 public class KMonoBehaviour
@@ -153,7 +196,13 @@ public class Operational
     public void SetActive(bool value) => IsActive = value;
 }
 public readonly record struct Tag(string Name);
-public class Filterable { public Tag SelectedTag; }
+public class Filterable
+{
+    public Tag SelectedTag;
+    public Generator Owner;
+    public T GetComponent<T>() => Owner is T value ? value : default;
+    public Dictionary<Tag, HashSet<Tag>> GetTagOptions() => new();
+}
 public class Element
 {
     public Tag tag;
@@ -181,13 +230,27 @@ public class Substance
 public static class Assets
 {
     public static bool HasPrefab = true;
-    public static GameObject TryGetPrefab(Tag tag) => HasPrefab ? new GameObject() : null;
+    public static readonly HashSet<Tag> MissingPrefabs = new();
+    public static GameObject TryGetPrefab(Tag tag) => HasPrefab && !MissingPrefabs.Contains(tag) ? new GameObject() : null;
 }
 public static class Grid
 {
     public static bool Valid = true;
     public static int PosToCell(Vector3 position) => 0;
     public static bool IsValidCell(int cell) => Valid;
+}
+public static class GeneratedBuildings { public static void LoadGeneratedBuildings() { } }
+public static class ModUtil { public static void AddBuildingToPlanScreen(string category, string id) { } }
+public class FilterSideScreen
+{
+    public bool isLogicFilter;
+    public bool IsValidForTarget(GameObject target) => false;
+}
+namespace SolidResourceGenerator { public static class SolidResourceGeneratorConfig { public const string ID = "SolidResourceGenerator"; } }
+namespace HarmonyLib
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class HarmonyPatch : Attribute { public HarmonyPatch(Type type, string method) { } }
 }
 namespace UnityEngine
 {
