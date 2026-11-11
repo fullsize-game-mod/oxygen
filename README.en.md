@@ -2,6 +2,8 @@
 
 [简体中文](README.md) | English
 
+> New standalone mod: [Solid Resource Generator](SolidResourceGenerator/README.md) (Chinese documentation). Select a solid element and generate **0–100 kg/s** (adjustable, default **1 kg/s**) using **120 W** while running, with automation input for green/red start/stop control and no ingredients or Duplicant labor. [Download the package](dist/SolidResourceGenerator.zip). Compilation against public API references and isolated production checks pass; in-game validation is pending.
+
 Adds an adjustable, bidirectional temperature controller to the vanilla Space Heater in **Oxygen Not Included**: **heats below the target temperature and actively cools above it**. Adds no new buildings, requires no PLib, and does not modify the Liquid Tepidizer.
 
 > Current version: **1.1.0**. Thermal calculation checks pass, but in-game validation has not been completed. Back up your saves before use. This English README does not add English in-game localization: the mod name and custom tooltips are currently in Chinese.
