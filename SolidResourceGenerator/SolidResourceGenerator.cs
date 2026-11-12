@@ -52,7 +52,7 @@ namespace SolidResourceGenerator
 
             Element element = ElementLoader.GetElement(filterable.SelectedTag);
             // 读档后原资源可能被其他 Mod 移除；拒绝无效元素或没有掉落物预制体的资源。
-            if (!CanGenerate(element))
+            if (!SolidResourceSupport.IsSupported(filterable.SelectedTag))
             {
                 operational.SetActive(false);
                 return;
@@ -70,13 +70,6 @@ namespace SolidResourceGenerator
             // 使用原版生成接口合并同格同类掉落物，避免每次更新都堆出新对象。
             element.substance.SpawnResource(position, kilogramsPerSecond * dt, temperature, byte.MaxValue, 0);
             operational.SetActive(true);
-        }
-
-        // 选择列表与生产共用条件，避免未发现资源可选却无法生成。
-        internal static bool CanGenerate(Element element)
-        {
-            return element != null && element.IsSolid && !element.disabled && element.substance != null &&
-                element.highTemp > 1f && Assets.TryGetPrefab(element.tag) != null;
         }
 
         public int SliderDecimalPlaces(int index) => 1;

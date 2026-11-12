@@ -112,16 +112,27 @@ rateField.SetValue(rateGenerator, float.NaN);
 rateGenerator.Spawn();
 Check(rateGenerator.GetSliderValue(0) == 1f, "读档时必须修复无效速度");
 
-// 原版列表只提供已发现的铁和“无选择”；其他元素没有发现或库存记录。
+// 原版列表只发现了铁，并夹杂食物、种子等非元素选项。
+var food = new Tag("CookedMeat");
+var egg = new Tag("HatchEgg");
+var seed = new Tag("Seed");
+var foodCategory = new Tag("Food");
+var eggCategory = new Tag("Eggs");
+var liquidCategory = new Tag("Liquids");
+// 物品即使能映射到基础元素，也不能按该元素生成。
+ElementLoader.Elements[food] = iron;
 var originalOptions = new Dictionary<Tag, HashSet<Tag>>
 {
     [GameTags.Other] = new HashSet<Tag> { GameTags.Void },
-    [iron.materialCategory] = new HashSet<Tag> { iron.tag }
+    [iron.materialCategory] = new HashSet<Tag> { iron.tag, seed },
+    [foodCategory] = new HashSet<Tag> { food },
+    [eggCategory] = new HashSet<Tag> { egg },
+    [liquidCategory] = new HashSet<Tag> { new Tag("Fluid") }
 };
 var options = originalOptions;
 var regularFilter = new Filterable();
 regularFilter.Initialize();
-SolidResourceGenerator.GeneratorResourceOptionsPatch.Postfix(regularFilter, ref options);
+SolidResourceGenerator.GeneratorSolidOptionsPatch.Postfix(regularFilter, ref options);
 Check(ReferenceEquals(options, originalOptions), "普通筛选器必须保留原版列表");
 
 var unknownSolid = new Element { tag = new Tag("UnknownSolid"), materialCategory = iron.materialCategory, IsSolid = true, highTemp = 2000f };
@@ -142,26 +153,36 @@ foreach (var element in invalidElements)
 Assets.MissingPrefabs.Add(new Tag("NoPrefab"));
 
 filter.Initialize(generator);
-SolidResourceGenerator.GeneratorResourceOptionsPatch.Postfix(filter, ref options);
+SolidResourceGenerator.GeneratorSolidOptionsPatch.Postfix(filter, ref options);
 Check(options[iron.materialCategory].SetEquals(new[] { iron.tag, unknownSolid.tag }),
     "未发现、未拥有过的固体必须与已发现资源一起按原版类别显示");
 Check(options[ice.materialCategory].SetEquals(new[] { ice.tag }), "未发现资源的新分类必须出现在列表中");
 Check(options[GameTags.Other].SetEquals(new[] { GameTags.Void, uncategorizedSolid.tag }),
     "必须保留原版无选择项，缺少分类的 Mod 元素归入其他");
-Check(options.Count == 3, "无效资源不能产生额外分类");
+Check(options.Count == 3 && !options.ContainsKey(foodCategory) && !options.ContainsKey(eggCategory) &&
+    !options.ContainsKey(liquidCategory), "菜单必须排除食物、蛋、种子、液体及空分类");
 foreach (var element in invalidElements)
     foreach (var resources in options.Values)
         Check(!resources.Contains(element.tag), "不能选择无法生成的资源：" + element.tag.Name);
-Check(originalOptions.Count == 2 && originalOptions[iron.materialCategory].SetEquals(new[] { iron.tag }) &&
+Check(originalOptions.Count == 5 && originalOptions[iron.materialCategory].SetEquals(new[] { iron.tag, seed }) &&
     originalOptions[GameTags.Other].SetEquals(new[] { GameTags.Void }), "不能修改原版字典或共享集合中的发现记录");
+options[iron.materialCategory].Clear();
+Check(originalOptions[iron.materialCategory].Contains(iron.tag), "返回的每个分类集合必须独立");
+Dictionary<Tag, HashSet<Tag>> emptyOptions = null;
+SolidResourceGenerator.GeneratorSolidOptionsPatch.Postfix(filter, ref emptyOptions);
+Check(emptyOptions[iron.materialCategory].Contains(unknownSolid.tag), "原版列表为空时也必须列出未发现资源");
 
 filter.SelectedTag = unknownSolid.tag;
 generator.SetSliderValue(1f, 0);
 generator.Sim200ms(0.2f);
 Check(Math.Abs(unknownSolid.substance.TotalMass - 0.2f) < 0.0001f && operational.IsActive,
     "未发现且从未持有过的资源必须能直接生产");
+filter.SelectedTag = food;
+baseline = iron.substance.TotalMass;
+generator.Sim200ms(0.2f);
+Check(!operational.IsActive && iron.substance.TotalMass == baseline, "已保存的不支持物品选择也不能生成基础元素");
 
-Console.WriteLine("PASS: power, adjustable rate, settings, temperature, invalid inputs, undiscovered solid selection and generation, categories, none option, vanilla filter isolation and shared-data isolation.");
+Console.WriteLine("PASS: power, adjustable rate, settings, temperature, invalid inputs, undiscovered solids, solid-only menu, exact element identity, categories, none option and shared-data isolation.");
 
 // 只替代游戏边界，执行的是正式生产组件；不模拟 UI、存档和物理系统。
 public class KMonoBehaviour
@@ -253,6 +274,14 @@ public static class Grid
     public static int PosToCell(Vector3 position) => 0;
     public static bool IsValidCell(int cell) => Valid;
 }
+public static class GeneratedBuildings { public static void LoadGeneratedBuildings() { } }
+public static class ModUtil { public static void AddBuildingToPlanScreen(string category, string id) { } }
+public class FilterSideScreen
+{
+    public bool isLogicFilter;
+    public bool IsValidForTarget(GameObject target) => false;
+}
+namespace SolidResourceGenerator { public static class SolidResourceGeneratorConfig { public const string ID = "SolidResourceGenerator"; } }
 namespace UnityEngine
 {
     public class GameObject
