@@ -27,7 +27,7 @@ namespace SolidResourceGenerator
 
         public override void ConfigureBuildingTemplate(GameObject go, Tag prefab_tag)
         {
-            // 原版 Filterable 提供单选固体列表，并负责保存、读取和复制选择。
+            // 原版 Filterable 保存、读取和复制选择；资源列表由本 Mod 补齐未发现元素。
             go.AddOrGet<Filterable>().filterElementState = Filterable.ElementState.Solid;
             go.AddOrGet<CopyBuildingSettings>().copyGroupTag = new Tag(ID);
         }

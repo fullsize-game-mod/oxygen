@@ -15,8 +15,8 @@ var operational = new Operational();
 var filter = new Filterable();
 var generator = new Generator();
 generator.Initialize(operational, filter);
-var iron = new Element { tag = new Tag("Iron"), IsSolid = true, highTemp = 1811f };
-var ice = new Element { tag = new Tag("Ice"), IsSolid = true, highTemp = 273.15f };
+var iron = new Element { tag = new Tag("Iron"), materialCategory = new Tag("RefinedMetal"), IsSolid = true, highTemp = 1811f };
+var ice = new Element { tag = new Tag("Ice"), materialCategory = new Tag("Liquifiable"), IsSolid = true, highTemp = 273.15f };
 ElementLoader.Elements.Add(iron.tag, iron);
 ElementLoader.Elements.Add(ice.tag, ice);
 
@@ -112,7 +112,56 @@ rateField.SetValue(rateGenerator, float.NaN);
 rateGenerator.Spawn();
 Check(rateGenerator.GetSliderValue(0) == 1f, "读档时必须修复无效速度");
 
-Console.WriteLine("PASS: power, adjustable rate, pause, bounds, per-building settings, copy settings, saved-field validation, resource switching, temperature, germs and invalid inputs.");
+// 原版列表只提供已发现的铁和“无选择”；其他元素没有发现或库存记录。
+var originalOptions = new Dictionary<Tag, HashSet<Tag>>
+{
+    [GameTags.Other] = new HashSet<Tag> { GameTags.Void },
+    [iron.materialCategory] = new HashSet<Tag> { iron.tag }
+};
+var options = originalOptions;
+var regularFilter = new Filterable();
+regularFilter.Initialize();
+SolidResourceGenerator.GeneratorResourceOptionsPatch.Postfix(regularFilter, ref options);
+Check(ReferenceEquals(options, originalOptions), "普通筛选器必须保留原版列表");
+
+var unknownSolid = new Element { tag = new Tag("UnknownSolid"), materialCategory = iron.materialCategory, IsSolid = true, highTemp = 2000f };
+var uncategorizedSolid = new Element { tag = new Tag("ModSolid"), IsSolid = true, highTemp = 1000f };
+ElementLoader.Elements.Add(unknownSolid.tag, unknownSolid);
+ElementLoader.Elements.Add(uncategorizedSolid.tag, uncategorizedSolid);
+var invalidElements = new[]
+{
+    new Element { tag = new Tag("DisabledSolid"), IsSolid = true, highTemp = 1000f, disabled = true },
+    new Element { tag = new Tag("Fluid"), IsSolid = false, highTemp = 1000f },
+    new Element { tag = new Tag("NoSubstance"), IsSolid = true, highTemp = 1000f, substance = null },
+    new Element { tag = new Tag("NoPrefab"), IsSolid = true, highTemp = 1000f },
+    new Element { tag = new Tag("LowMeltingPoint"), IsSolid = true, highTemp = 1f },
+    new Element { tag = new Tag("InvalidMeltingPoint"), IsSolid = true, highTemp = float.NaN }
+};
+foreach (var element in invalidElements)
+    ElementLoader.Elements.Add(element.tag, element);
+Assets.MissingPrefabs.Add(new Tag("NoPrefab"));
+
+filter.Initialize(generator);
+SolidResourceGenerator.GeneratorResourceOptionsPatch.Postfix(filter, ref options);
+Check(options[iron.materialCategory].SetEquals(new[] { iron.tag, unknownSolid.tag }),
+    "未发现、未拥有过的固体必须与已发现资源一起按原版类别显示");
+Check(options[ice.materialCategory].SetEquals(new[] { ice.tag }), "未发现资源的新分类必须出现在列表中");
+Check(options[GameTags.Other].SetEquals(new[] { GameTags.Void, uncategorizedSolid.tag }),
+    "必须保留原版无选择项，缺少分类的 Mod 元素归入其他");
+Check(options.Count == 3, "无效资源不能产生额外分类");
+foreach (var element in invalidElements)
+    foreach (var resources in options.Values)
+        Check(!resources.Contains(element.tag), "不能选择无法生成的资源：" + element.tag.Name);
+Check(originalOptions.Count == 2 && originalOptions[iron.materialCategory].SetEquals(new[] { iron.tag }) &&
+    originalOptions[GameTags.Other].SetEquals(new[] { GameTags.Void }), "不能修改原版字典或共享集合中的发现记录");
+
+filter.SelectedTag = unknownSolid.tag;
+generator.SetSliderValue(1f, 0);
+generator.Sim200ms(0.2f);
+Check(Math.Abs(unknownSolid.substance.TotalMass - 0.2f) < 0.0001f && operational.IsActive,
+    "未发现且从未持有过的资源必须能直接生产");
+
+Console.WriteLine("PASS: power, adjustable rate, settings, temperature, invalid inputs, undiscovered solid selection and generation, categories, none option, vanilla filter isolation and shared-data isolation.");
 
 // 只替代游戏边界，执行的是正式生产组件；不模拟 UI、存档和物理系统。
 public class KMonoBehaviour
@@ -152,11 +201,24 @@ public class Operational
     public bool IsActive;
     public void SetActive(bool value) => IsActive = value;
 }
-public readonly record struct Tag(string Name);
-public class Filterable { public Tag SelectedTag; }
+public readonly record struct Tag(string Name)
+{
+    public bool IsValid => !string.IsNullOrEmpty(Name);
+}
+public static class GameTags
+{
+    public static readonly Tag Void = new Tag("Void");
+    public static readonly Tag Other = new Tag("Other");
+}
+public class Filterable : KMonoBehaviour
+{
+    public Tag SelectedTag;
+    public Dictionary<Tag, HashSet<Tag>> GetTagOptions() => throw new NotImplementedException();
+}
 public class Element
 {
     public Tag tag;
+    public Tag materialCategory;
     public bool IsSolid;
     public bool disabled;
     public float highTemp;
@@ -165,6 +227,7 @@ public class Element
 public static class ElementLoader
 {
     public static readonly Dictionary<Tag, Element> Elements = new Dictionary<Tag, Element>();
+    public static IEnumerable<Element> elements => Elements.Values;
     public static Element GetElement(Tag tag) => Elements.TryGetValue(tag, out var element) ? element : null;
 }
 public class Substance
@@ -181,7 +244,8 @@ public class Substance
 public static class Assets
 {
     public static bool HasPrefab = true;
-    public static GameObject TryGetPrefab(Tag tag) => HasPrefab ? new GameObject() : null;
+    public static readonly HashSet<Tag> MissingPrefabs = new HashSet<Tag>();
+    public static GameObject TryGetPrefab(Tag tag) => HasPrefab && !MissingPrefabs.Contains(tag) ? new GameObject() : null;
 }
 public static class Grid
 {
@@ -212,4 +276,12 @@ namespace KSerialization
         public SerializationConfig(MemberSerialization memberSerialization) { }
     }
     public sealed class Serialize : Attribute { }
+}
+namespace HarmonyLib
+{
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class HarmonyPatch : Attribute
+    {
+        public HarmonyPatch(Type type, string methodName) { }
+    }
 }
