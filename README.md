@@ -11,6 +11,7 @@
 | 空间加热器温控 | 为原版空间加热器添加 −200～200°C 双向温控，低于目标加热、高于目标制冷 | [使用、参数与限制](AdjustableSpaceHeater/README.md) | [AdjustableSpaceHeater.zip](dist/AdjustableSpaceHeater.zip) |
 | 固体资源生成器 | 新增通电生成指定固体元素的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、资源范围与限制](SolidResourceGenerator/README.md) | [SolidResourceGenerator.zip](dist/SolidResourceGenerator.zip) |
 | 液体资源生成器 | 新增通电生成指定液体元素并经液体管道输出的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、管道输出与限制](LiquidResourceGenerator/README.md) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
+| 食物原料生成器 | 新增通电生成肉、生蛋液、鱼肉与作物等原料的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、原料范围与限制](FoodResourceGenerator/README.md) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
 
 各 Mod 的版本、配置、使用方式和验证范围以对应目录中的说明为准。目前尚未完成游戏内验收，使用前请备份存档。
 
@@ -26,7 +27,7 @@
 | macOS | `~/Library/Application Support/unity.Klei.Oxygen Not Included/mods/Local/` |
 | Linux | `~/.config/unity3d/Klei/Oxygen Not Included/mods/Local/` |
 
-Windows 的文档目录若被 OneDrive 等重定向，以实际文档目录为准。以同时安装三个 Mod 为例，目录层级应为：
+Windows 的文档目录若被 OneDrive 等重定向，以实际文档目录为准。以同时安装四个 Mod 为例，目录层级应为：
 
 ```text
 mods/Local/
@@ -38,8 +39,12 @@ mods/Local/
 │   ├── SolidResourceGenerator.dll
 │   ├── mod.yaml
 │   └── mod_info.yaml
-└── LiquidResourceGenerator/
-    ├── LiquidResourceGenerator.dll
+├── LiquidResourceGenerator/
+│   ├── LiquidResourceGenerator.dll
+│   ├── mod.yaml
+│   └── mod_info.yaml
+└── FoodResourceGenerator/
+    ├── FoodResourceGenerator.dll
     ├── mod.yaml
     └── mod_info.yaml
 ```
@@ -65,6 +70,7 @@ Windows / Linux 通常位于游戏安装目录的 `OxygenNotIncluded_Data/Manage
 dotnet build AdjustableSpaceHeater/AdjustableSpaceHeater.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build SolidResourceGenerator/SolidResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build LiquidResourceGenerator/LiquidResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
+dotnet build FoodResourceGenerator/FoodResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 ```
 
 也可以通过环境变量 `ONI_MANAGED_PATH` 指定该目录。首次构建需要联网还原 `Lib.Harmony.Ref` 2.4.2 编译引用；游戏负责提供运行时依赖。
@@ -79,17 +85,19 @@ dotnet build LiquidResourceGenerator/LiquidResourceGenerator.csproj -c Release "
 dotnet run --project tests/ThermalBehavior/ThermalBehavior.csproj -c Release
 dotnet run --project tests/SolidGeneration/SolidGeneration.csproj -c Release
 dotnet run --project tests/LiquidGeneration/LiquidGeneration.csproj -c Release
+dotnet run --project tests/FoodGeneration/FoodGeneration.csproj -c Release
 ```
 
 - `ThermalBehavior`：空间加热器的换热方向、功率预算、热容量与温度边界等计算检查。
 - `SolidGeneration`：固体资源生成器的生产速率、运行条件、设置与无效输入等独立检查，使用替身隔离游戏边界。
 - `LiquidGeneration`：液体资源生成器的生产速率、管道连接与堵塞、缓冲容量、液态温度、设置与资源列表检查，使用替身隔离游戏边界。
+- `FoodGeneration`：食物原料生成器的物品类型、质量与单位换算、生产速率、设置、缺失原料和资源列表检查，使用替身隔离游戏边界。
 
 这些检查不能替代游戏内验收；侧栏显示、自动化网络、真实存档读写和 DLC 组合等仍需在游戏中确认。各 Mod 的详细验证范围见对应说明。
 
 ## 兼容性
 
-当前三个 Mod 均以 `netstandard2.1` 为目标框架，引用 Harmony 2.4.2；各自的 `mod_info.yaml` 声明 `minimumSupportedBuild: 718946`、`APIVersion: 2`。这些配置不代表已在对应游戏版本完成实测。游戏更新后，应使用当前游戏程序集重新编译并进行游戏内验证。
+当前四个 Mod 均以 `netstandard2.1` 为目标框架，引用 Harmony 2.4.2；各自的 `mod_info.yaml` 声明 `minimumSupportedBuild: 718946`、`APIVersion: 2`。这些配置不代表已在对应游戏版本完成实测。游戏更新后，应使用当前游戏程序集重新编译并进行游戏内验证。
 
 ## 项目结构
 
@@ -100,9 +108,11 @@ dotnet run --project tests/LiquidGeneration/LiquidGeneration.csproj -c Release
 ├── AdjustableSpaceHeater/            # 空间加热器温控源码与详细说明
 ├── SolidResourceGenerator/           # 固体资源生成器源码与详细说明
 ├── LiquidResourceGenerator/          # 液体资源生成器源码与详细说明
+├── FoodResourceGenerator/            # 食物原料生成器源码与详细说明
 ├── tests/
 │   ├── ThermalBehavior/              # 换热计算检查
 │   ├── SolidGeneration/              # 固体资源生产检查
-│   └── LiquidGeneration/             # 液体资源与管道边界检查
+│   ├── LiquidGeneration/             # 液体资源与管道边界检查
+│   └── FoodGeneration/               # 食物原料生产与物品边界检查
 └── dist/                             # 各 Mod 的可安装文件夹与 ZIP 包
 ```

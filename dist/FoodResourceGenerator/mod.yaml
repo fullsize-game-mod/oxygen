@@ -1,0 +1,3 @@
+title: "食物原料生成器"
+description: "新增食物原料生成器：选择肉、生蛋液、鱼肉或作物等原料，通电即生成，速度可调 0～100 kg/s（默认 1 kg/s），支持自动化启停，无需原料或复制人操作，工作耗电 120 W。"
+staticID: "local.FoodResourceGenerator"
