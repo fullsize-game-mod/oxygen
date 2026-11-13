@@ -6,6 +6,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="BuildingRegistrationChecks.cs" />
+    <Compile Include="../../AdjustableSpaceHeater/AdjustableSpaceHeaterConfig.cs" Link="AdjustableSpaceHeaterConfig.cs" />
+    <Compile Include="../../AdjustableSpaceHeater/Patches.cs" Link="Patches.cs" />
+    <Compile Include="../../AdjustableSpaceHeater/Mod.cs" Link="Mod.cs" />
     <Compile Include="../../AdjustableSpaceHeater/TemperatureSettings.cs" Link="TemperatureSettings.cs" />
     <Compile Include="../../AdjustableSpaceHeater/ThermalMath.cs" Link="ThermalMath.cs" />
   </ItemGroup>

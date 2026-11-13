@@ -49,4 +49,5 @@ for (int tick = 0; tick < 150; tick++)
 Near(current, hotTarget, "Reversed target heats from -200°C to 200°C");
 Near(TemperatureSettings.ClampKelvin(0f), coldTarget, "Lower range clamp");
 Near(TemperatureSettings.ClampKelvin(1273.15f), hotTarget, "Upper range clamp");
+BuildingRegistrationChecks.Run();
 Console.WriteLine("PASS: heating/cooling direction, power budget, mixed cells, heat capacity, no overshoot, target reversal and range boundaries.");

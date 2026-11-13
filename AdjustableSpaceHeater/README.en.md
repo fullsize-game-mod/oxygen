@@ -2,14 +2,16 @@
 
 [Back to mod list](../README.en.md) · [简体中文](README.md) | English
 
-Adds an adjustable, bidirectional temperature controller to the vanilla Space Heater in **Oxygen Not Included**: **heats below the target temperature and actively cools above it**. Adds no new buildings, requires no PLib, and does not modify the Liquid Tepidizer.
+Adds an independent **Space Temperature Controller (“空间温控器”)** to **Oxygen Not Included**: **heats below the target temperature and actively cools above it**. Available in Utilities from the start without research, it reuses the vanilla Space Heater appearance and requires no PLib.
 
-> Current version: **1.1.0**. Thermal calculation checks pass, but in-game validation has not been completed. Back up your saves before use. This English README does not add English in-game localization: the mod name and custom tooltips are currently in Chinese.
+> Current version: **1.2.0**. Building configuration and thermal calculation checks pass, but in-game validation has not been completed. Back up your saves before use. This English README does not add English in-game localization: the mod name and custom tooltips are currently in Chinese.
 
 ## Features
 
 | Setting | Behavior / value |
 | --- | --- |
+| Build menu | Utilities, available from the start without research |
+| Footprint / materials | 2×2 cells, 400 kg metal ore or refined metal, built on the floor |
 | Target temperature | −200 to 200°C, adjustable by slider or numeric input with one decimal place |
 | Default target | 70°C; each building saves its own setting |
 | Bidirectional control | Active heating or cooling; idles when no eligible medium is present or all affected cells reach the target |
@@ -21,7 +23,7 @@ Adds an adjustable, bidirectional temperature controller to the vanilla Space He
 | Base overheat temperature | 1000°C; material overheat bonuses remain in effect, and melting points are unchanged |
 | Temperature units | Follows the game's Celsius / Fahrenheit / Kelvin setting; the physical range remains −200 to 200°C |
 
-The bidirectional controller replaces the vanilla fixed self-heating, exhaust heat, and heating-only state machine so that heat generation does not counteract cooling. Existing `Operational` requirements, including power, automation, damage, and flooding, still apply. The game continues to handle natural heat conduction.
+The independent building uses only the bidirectional controller, without fixed self-heating, exhaust heat, or the vanilla heating-only state machine. Existing `Operational` requirements, including power, automation, damage, and flooding, still apply. Green automation permits operation, red stops it, and an unwired input permits operation. The game continues to handle natural heat conduction. The mod no longer modifies the vanilla Space Heater or Liquid Tepidizer.
 
 ## Installation
 
@@ -44,14 +46,18 @@ mods/Local/AdjustableSpaceHeater/
 └── mod_info.yaml
 ```
 
-Do not place the ZIP itself in `Local` or nest the mod inside an extra folder with the same name. Avoid enabling other mods that alter the Space Heater's temperature control at the same time.
+Do not place the ZIP itself in `Local` or nest the mod inside an extra folder with the same name.
 
 ## Usage
 
-1. Build or select a vanilla Space Heater and satisfy its operating requirements, including power.
+1. Start or load a save, select “空间温控器” in Utilities, and build it using 400 kg metal ore or refined metal. No research is required.
 2. Set a target temperature using the sidebar slider or numeric input.
 3. For example, setting −200°C in a 20°C environment actively removes heat; changing the target to 200°C actively adds heat.
-4. Each building can have a different target, stored with the save. Disabling this mod stops custom target temperatures from taking effect.
+4. Connect power and satisfy the operating requirements to start temperature control. Each building can have a different target, stored with the save.
+
+### Upgrading from 1.1.0 or earlier
+
+Earlier versions modified the vanilla Space Heater. Version 1.2.0 uses a separate building ID and **does not convert existing buildings**. Vanilla Space Heaters return to their original heating, heat generation, and overheat threshold; their old custom setpoints no longer apply. Build a new Space Temperature Controller and set its target if you need bidirectional control. Deconstruct independent controllers before removing this mod to avoid missing building definitions in your save.
 
 ### Operating limits
 
@@ -65,8 +71,9 @@ Do not place the ZIP itself in `Local` or nest the mod inside an extra folder wi
 
 - Targets the **Unity 6 / Harmony 2.4.2** branch and `netstandard2.1`.
 - `mod_info.yaml` declares `minimumSupportedBuild: 718946` and `APIVersion: 2`. Build 718946 is the lower bound associated with the Harmony version used by this project, **not a claim of successful in-game testing on that build**.
-- The existing `tests/ThermalBehavior` checks pass: heating / cooling direction, power budget, the absolute energy budget for mixed hot and cold cells, heat capacity, no overshoot, target reversal, and temperature range boundaries.
-- These checks run isolated thermal calculations. They **do not cover** game loading, sidebar rendering, actual phase changes, overheat damage, save persistence, or DLC combinations. In-game compatibility remains unverified.
+- `tests/ThermalBehavior` checks pass: independent building registration, strings, starting materials, power and automation configuration, no vanilla building or research patches, heating / cooling direction, power budget, the absolute energy budget for mixed hot and cold cells, heat capacity, no overshoot, target reversal, and temperature range boundaries.
+- The mod builds with OniStubs 2.0.0 and Unity compile-time references. Those references predate the declared minimum game build and do not establish compatibility with the current game API.
+- Building checks use test doubles at game boundaries without real Harmony injection or a research tree; thermal checks run isolated calculations. They **do not cover** game loading, menu or sidebar rendering, actual phase changes, overheat damage, save persistence, or DLC combinations. In-game compatibility remains unverified.
 - Game updates may change building APIs. Rebuilding against your own current game assemblies checks compile-time compatibility, but does not replace in-game acceptance checks.
 
 ## Building from source
@@ -92,7 +99,7 @@ Alternatively, set the `ONI_MANAGED_PATH` environment variable. The first build 
 
 A successful build automatically populates `dist/AdjustableSpaceHeater/` with only the mod DLL and two YAML files. Game, Unity, and Harmony DLLs are not included. The build **does not update the ZIP automatically**: before distribution, compress the entire generated folder into `dist/AdjustableSpaceHeater.zip` again.
 
-## Running calculation checks
+## Running isolated checks
 
 No game assemblies are required. The check project targets `net8.0`: use the .NET 8 SDK, or a newer SDK capable of building that target together with the .NET 8 runtime.
 
@@ -103,16 +110,19 @@ dotnet run --project tests/ThermalBehavior/ThermalBehavior.csproj -c Release
 Successful output:
 
 ```text
+PASS: independent building registration, strings, starting materials, power, automation and no vanilla patches.
 PASS: heating/cooling direction, power budget, mixed cells, heat capacity, no overshoot, target reversal and range boundaries.
 ```
 
 ### In-game acceptance checklist
 
-- Build two Space Heaters and enter −200, 0, and 200°C independently. Check the sidebar's input limits and confirm that each building has its own setting.
+- Start a save without completing any research. Confirm that Utilities lists “空间温控器” and that it can be built from metal ore and operated with power.
+- Build two controllers and enter −200, 0, and 200°C independently. Check the sidebar's input limits and confirm that each building has its own setting.
 - Set −200°C in a 20°C environment and confirm actual cooling. Change to 200°C and confirm actual heating. The building should idle once its target is reached.
 - Check that loss of power and disabled automation stop heat exchange. Check that condensed liquids can still be cooled, noting the limits caused by flooding and freezing.
-- Save and reload with different targets on the two buildings. Confirm that settings persist and that existing buildings in older saves receive the temperature-control interface.
-- Use a material without an overheat bonus to check the 1000°C base threshold, then check material bonuses and confirm that the Liquid Tepidizer is unaffected.
+- Save and reload with different targets on the two buildings. Confirm that settings persist and that older saves can also build independent controllers immediately.
+- Confirm that the automation port appears in previews, construction, and completed buildings; red stops operation, green resumes it, and unwired inputs allow operation.
+- Use a material without an overheat bonus to check the 1000°C base threshold, then check material bonuses and confirm that the vanilla Space Heater and Liquid Tepidizer retain their original behavior.
 
 ## Source structure
 
@@ -122,7 +132,8 @@ AdjustableSpaceHeater/
 ├── README.en.md                      # English documentation
 ├── AdjustableSpaceHeater.csproj      # Build and packaging configuration
 ├── Mod.cs                            # Mod entry point and tooltip strings
-├── Patches.cs                        # Vanilla building patches
+├── AdjustableSpaceHeaterConfig.cs    # Independent building definition
+├── Patches.cs                        # Starting build-menu registration
 ├── HeaterTemperatureControl.cs       # Temperature UI and simulation updates
 ├── TemperatureSettings.cs            # Temperature, power, and range constants
 ├── ThermalMath.cs                    # Pure heat-exchange calculations
@@ -132,6 +143,7 @@ AdjustableSpaceHeater/
 
 ## Changelog
 
+- **1.2.0:** Adds the independent Space Temperature Controller, available in Utilities from the start without research. Restores vanilla Space Heater behavior; existing buildings are not converted.
 - **1.1.0:** Replaces threshold-only heating with true bidirectional temperature control and active cooling. Removes vanilla fixed heat generation and adds heating / cooling transitions and power-boundary checks.
 - **1.0.0:** Only adjusted the temperature at which heating stops; did not provide cooling. Superseded by 1.1.0.
 

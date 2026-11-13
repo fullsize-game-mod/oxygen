@@ -1,3 +1,3 @@
 title: "空间加热器温控"
-description: "空间加热器支持 -200～200°C 双向温控：高于目标制冷，低于目标加热。基础过热温度为 1000°C。"
+description: "新增开局即可建造的独立空间温控器，无需研究，支持 -200～200°C 双向温控；工作耗电 120 W，基础过热温度为 1000°C。"
 staticID: "local.AdjustableSpaceHeater"

@@ -8,7 +8,7 @@
 
 | Mod | 功能简介 | 详细说明 | 下载 |
 | --- | --- | --- | --- |
-| 空间加热器温控 | 为原版空间加热器添加 −200～200°C 双向温控，低于目标加热、高于目标制冷 | [使用、参数与限制](AdjustableSpaceHeater/README.md) | [AdjustableSpaceHeater.zip](dist/AdjustableSpaceHeater.zip) |
+| 空间加热器温控 | 新增开局即可建造的独立空间温控器，无需研究，支持 −200～200°C 双向温控 | [使用、参数与限制](AdjustableSpaceHeater/README.md) | [AdjustableSpaceHeater.zip](dist/AdjustableSpaceHeater.zip) |
 | 固体资源生成器 | 新增通电生成指定固体元素的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、资源范围与限制](SolidResourceGenerator/README.md) | [SolidResourceGenerator.zip](dist/SolidResourceGenerator.zip) |
 | 液体资源生成器 | 新增通电生成指定液体元素并经液体管道输出的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、管道输出与限制](LiquidResourceGenerator/README.md) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
 | 食物原料生成器 | 自动列出已加载食物配方使用的物品原料，通电生成，速度可调 0～100 kg/s，支持 DLC、其他 Mod 与自动化启停 | [使用、原料范围与限制](FoodResourceGenerator/README.md) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
@@ -88,7 +88,7 @@ dotnet run --project tests/LiquidGeneration/LiquidGeneration.csproj -c Release
 dotnet run --project tests/FoodGeneration/FoodGeneration.csproj -c Release
 ```
 
-- `ThermalBehavior`：空间加热器的换热方向、功率预算、热容量与温度边界等计算检查。
+- `ThermalBehavior`：独立空间温控器的建筑注册与配置，以及换热方向、功率预算、热容量与温度边界等检查。
 - `SolidGeneration`：固体资源生成器的生产速率、运行条件、设置与无效输入等独立检查，使用替身隔离游戏边界。
 - `LiquidGeneration`：液体资源生成器的生产速率、管道连接与堵塞、缓冲容量、液态温度、设置与资源列表检查，使用替身隔离游戏边界。
 - `FoodGeneration`：食物原料生成器的物品类型、质量与单位换算、生产速率、设置、缺失原料和资源列表检查，使用替身隔离游戏边界。
