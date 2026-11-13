@@ -15,12 +15,17 @@ static void Check(bool condition, string message)
 
 static bool Near(float actual, float expected) => Math.Abs(actual - expected) < 0.0001f;
 
-static GameObject AddPrefab(string id, float massPerUnit = 1f)
+static GameObject AddPrefab(string id, float massPerUnit = 1f, bool edible = true, bool cookingIngredient = false)
 {
     var prefab = new GameObject();
-    prefab.Components.Add(new KPrefabID { PrefabTag = new Tag(id) });
+    var prefabId = new KPrefabID { PrefabTag = new Tag(id) };
+    if (cookingIngredient)
+        prefabId.Tags.Add(GameTags.CookingIngredient);
+    prefab.Components.Add(prefabId);
     prefab.Components.Add(new PrimaryElement { MassPerUnit = massPerUnit, Units = 1f, Temperature = 300f });
     prefab.Components.Add(new Pickupable());
+    if (edible)
+        prefab.Components.Add(new Edible());
     Assets.Prefabs[new Tag(id)] = prefab;
     return prefab;
 }
@@ -29,8 +34,32 @@ var meat = AddPrefab("Meat");
 var egg = AddPrefab("RawEgg");
 var wheat = AddPrefab("ColdWheatSeed", 0.001f);
 AddPrefab("CookedMeat");
-AddPrefab("HatchEgg");
-AddPrefab("Water");
+AddPrefab("CookedEgg");
+AddPrefab("ColdWheatBread");
+AddPrefab("SurfAndTurf");
+AddPrefab("ModMeal");
+AddPrefab("FinalFood");
+AddPrefab("OrphanFood");
+AddPrefab("ModSpice", edible: false, cookingIngredient: true);
+AddPrefab("HatchEgg", edible: false);
+AddPrefab("Water", edible: false);
+AddPrefab("Plastic", edible: false);
+
+Check(Support.GetIngredients().Count == 0, "配方尚未注册时不能永久缓存空列表");
+ComplexRecipeManager.Get().recipes.AddRange(new[]
+{
+    new ComplexRecipe(new[] { "Meat" }, new[] { "CookedMeat" }),
+    new ComplexRecipe(new[] { "RawEgg" }, new[] { "CookedEgg" }),
+    new ComplexRecipe(new[] { "ColdWheatSeed", "Water" }, new[] { "ColdWheatBread" }),
+    new ComplexRecipe(new[] { "CookedMeat", "FishMeat" }, new[] { "SurfAndTurf" }),
+    new ComplexRecipe(new[] { "ModSpice" }, new[] { "ModMeal" }),
+    new ComplexRecipe(new[] { "HatchEgg" }, new[] { "RawEgg" }),
+    new ComplexRecipe(new[] { "Meat" }, new[] { "Plastic" }),
+    new ComplexRecipe(Array.Empty<string>(), new[] { "FinalFood" }),
+    new ComplexRecipe(null, new[] { "FinalFood" }),
+    new ComplexRecipe(new[] { "Meat" }, null),
+    null
+});
 
 var operational = new Operational();
 var filter = new Filterable { SelectedTag = new Tag("Meat") };
@@ -77,7 +106,7 @@ generator.SetSliderValue(1f, 0);
 foreach (float dt in new[] { 0f, -1f, float.NaN, float.PositiveInfinity })
     generator.Sim200ms(dt);
 Check(GameUtil.Spawned.Count == baseline && !operational.IsActive, "异常时间步不得生成食物");
-foreach (string id in new[] { "Void", "MissingDlcIngredient", "FishMeat", "CookedMeat", "HatchEgg", "Water" })
+foreach (string id in new[] { "Void", "MissingDlcIngredient", "FishMeat", "HatchEgg", "Water", "OrphanFood", "FinalFood" })
 {
     filter.SelectedTag = new Tag(id);
     generator.Sim200ms(0.2f);
@@ -100,7 +129,7 @@ meat.GetComponent<PrimaryElement>().MassPerUnit = 1f;
 meat.GetComponent<KPrefabID>().PrefabTag = new Tag("Iron");
 Check(Support.GetPrefab(new Tag("Meat")) == null, "不能生成错配的预制体");
 meat.GetComponent<KPrefabID>().PrefabTag = new Tag("Meat");
-foreach (Type componentType in new[] { typeof(KPrefabID), typeof(PrimaryElement), typeof(Pickupable) })
+foreach (Type componentType in new[] { typeof(KPrefabID), typeof(PrimaryElement), typeof(Pickupable), typeof(Edible) })
 {
     object component = meat.Components.Single(item => item.GetType() == componentType);
     meat.Components.Remove(component);
@@ -149,9 +178,12 @@ regularFilter.Initialize();
 FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(regularFilter, ref options);
 Check(ReferenceEquals(options, originalOptions), "普通筛选器不受影响");
 FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(filter, ref options);
-Check(options[GameTags.CookingIngredient].SetEquals(new[] { new Tag("Meat"), new Tag("RawEgg"), new Tag("ColdWheatSeed") }) &&
+Check(options[GameTags.CookingIngredient].SetEquals(new[]
+    {
+        new Tag("Meat"), new Tag("RawEgg"), new Tag("ColdWheatSeed"), new Tag("CookedMeat"), new Tag("ModSpice")
+    }) &&
     options[GameTags.Other].SetEquals(new[] { GameTags.Void }) && options.Count == 2,
-    "必须列出已加载但未发现的原料，排除熟食、动物蛋、液体和缺失 DLC");
+    "必须从原版和 Mod 食物配方发现物品原料，包含中间食材，排除元素、动物蛋、最终成品和缺失 DLC");
 options[GameTags.Other].Clear();
 Check(originalOptions[GameTags.Other].Count == 3, "菜单不能修改原版共享的分类集合");
 Dictionary<Tag, HashSet<Tag>> emptyOptions = null;
@@ -174,7 +206,7 @@ Assets.Prefabs.Clear();
 FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(filter, ref emptyOptions);
 Check(emptyOptions.Count == 1 && emptyOptions[GameTags.Other].Contains(GameTags.Void), "没有可用原料时不能留下空分类");
 
-Console.WriteLine("PASS: food identity, kg/unit conversion, power, rates, settings, save validation, invalid prefabs, undiscovered ingredients, scoped sidebar and shared-data isolation.");
+Console.WriteLine("PASS: recipe discovery, mod ingredients, item filtering, food identity, kg/unit conversion, power, rates, settings, save validation, invalid prefabs, scoped sidebar and shared-data isolation.");
 
 // 仅替代游戏边界，执行正式生产组件和补丁；不模拟腐败、物理或真实存档系统。
 public class KMonoBehaviour
@@ -223,8 +255,14 @@ public class Filterable : KMonoBehaviour
     public Tag SelectedTag;
     public Dictionary<Tag, HashSet<Tag>> GetTagOptions() => throw new NotImplementedException();
 }
-public class KPrefabID { public Tag PrefabTag; }
+public class KPrefabID
+{
+    public Tag PrefabTag;
+    public readonly HashSet<Tag> Tags = new HashSet<Tag>();
+    public bool HasTag(Tag tag) => Tags.Contains(tag);
+}
 public class Pickupable { }
+public class Edible { }
 public class PrimaryElement
 {
     public float MassPerUnit = 1f, Units, Temperature;
@@ -235,6 +273,26 @@ public static class Assets
 {
     public static readonly Dictionary<Tag, GameObject> Prefabs = new Dictionary<Tag, GameObject>();
     public static GameObject TryGetPrefab(Tag tag) => Prefabs.TryGetValue(tag, out var prefab) ? prefab : null;
+}
+public class ComplexRecipe
+{
+    public RecipeElement[] ingredients, results;
+    public ComplexRecipe(string[] ingredientIds, string[] resultIds)
+    {
+        ingredients = ingredientIds?.Select(id => new RecipeElement(new Tag(id))).ToArray();
+        results = resultIds?.Select(id => new RecipeElement(new Tag(id))).ToArray();
+    }
+    public class RecipeElement
+    {
+        public Tag material;
+        public RecipeElement(Tag material) => this.material = material;
+    }
+}
+public class ComplexRecipeManager
+{
+    private static readonly ComplexRecipeManager Instance = new ComplexRecipeManager();
+    public readonly List<ComplexRecipe> recipes = new List<ComplexRecipe>();
+    public static ComplexRecipeManager Get() => Instance;
 }
 public static class GameUtil
 {

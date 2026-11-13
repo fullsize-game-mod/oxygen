@@ -37,7 +37,7 @@ namespace FoodResourceGenerator
                 [GameTags.Other] = new HashSet<Tag> { GameTags.Void }
             };
             var ingredients = new HashSet<Tag>();
-            foreach (Tag tag in FoodResourceSupport.Ingredients)
+            foreach (Tag tag in FoodResourceSupport.GetIngredients())
                 if (FoodResourceSupport.GetPrefab(tag) != null)
                     ingredients.Add(tag);
 
