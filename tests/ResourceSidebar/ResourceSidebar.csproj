@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="../../SolidResourceGenerator/Patches.cs" Link="SolidPatches.cs" />
+    <Compile Include="../../LiquidResourceGenerator/Patches.cs" Link="LiquidPatches.cs" />
+    <Compile Include="../../FoodResourceGenerator/Patches.cs" Link="FoodPatches.cs" />
+  </ItemGroup>
+</Project>

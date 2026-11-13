@@ -33,14 +33,12 @@ namespace SolidResourceGenerator
                 return;
 
             // 单独构建完整元素列表，不把未发现元素写入原版可能共享的发现记录。
-            var options = new Dictionary<Tag, HashSet<Tag>>();
-            if (__result != null)
-                foreach (var entry in __result)
-                {
-                    // 沿用原版“无选择”项所在的分类，保留清除选择的入口。
-                    if (entry.Value.Contains(GameTags.Void))
-                        options.Add(entry.Key, new HashSet<Tag> { GameTags.Void });
-                }
+            // 固定使用原版保留的 Void 分类，不能将“无选择”行混入资源分类。
+            // 共享侧栏会缓存分类中的行，跨分类重复的 Void 会导致回收池键冲突。
+            var options = new Dictionary<Tag, HashSet<Tag>>
+            {
+                [GameTags.Void] = new HashSet<Tag> { GameTags.Void }
+            };
 
             foreach (Element element in ElementLoader.elements)
             {

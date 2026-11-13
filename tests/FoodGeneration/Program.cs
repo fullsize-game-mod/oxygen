@@ -182,13 +182,13 @@ Check(options[GameTags.CookingIngredient].SetEquals(new[]
     {
         new Tag("Meat"), new Tag("RawEgg"), new Tag("ColdWheatSeed"), new Tag("CookedMeat"), new Tag("ModSpice")
     }) &&
-    options[GameTags.Other].SetEquals(new[] { GameTags.Void }) && options.Count == 2,
+    options[GameTags.Void].SetEquals(new[] { GameTags.Void }) && options.Count == 2,
     "必须从原版和 Mod 食物配方发现物品原料，包含中间食材，排除元素、动物蛋、最终成品和缺失 DLC");
-options[GameTags.Other].Clear();
+options[GameTags.Void].Clear();
 Check(originalOptions[GameTags.Other].Count == 3, "菜单不能修改原版共享的分类集合");
 Dictionary<Tag, HashSet<Tag>> emptyOptions = null;
 FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(filter, ref emptyOptions);
-Check(emptyOptions[GameTags.Other].Contains(GameTags.Void) && emptyOptions[GameTags.CookingIngredient].Contains(new Tag("Meat")),
+Check(emptyOptions[GameTags.Void].Contains(GameTags.Void) && emptyOptions[GameTags.CookingIngredient].Contains(new Tag("Meat")),
     "原版列表为空时也要提供清空入口和未发现原料");
 
 bool validTarget = false;
@@ -204,7 +204,7 @@ FoodResourceGenerator.GeneratorResourceSelectionPatch.Postfix(screen, regularFil
 Check(!validTarget, "不能改动其他建筑的侧栏规则");
 Assets.Prefabs.Clear();
 FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(filter, ref emptyOptions);
-Check(emptyOptions.Count == 1 && emptyOptions[GameTags.Other].Contains(GameTags.Void), "没有可用原料时不能留下空分类");
+Check(emptyOptions.Count == 1 && emptyOptions[GameTags.Void].Contains(GameTags.Void), "没有可用原料时不能留下空分类");
 
 Console.WriteLine("PASS: recipe discovery, mod ingredients, item filtering, food identity, kg/unit conversion, power, rates, settings, save validation, invalid prefabs, scoped sidebar and shared-data isolation.");
 

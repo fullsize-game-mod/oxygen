@@ -86,12 +86,15 @@ dotnet run --project tests/ThermalBehavior/ThermalBehavior.csproj -c Release
 dotnet run --project tests/SolidGeneration/SolidGeneration.csproj -c Release
 dotnet run --project tests/LiquidGeneration/LiquidGeneration.csproj -c Release
 dotnet run --project tests/FoodGeneration/FoodGeneration.csproj -c Release
+
+dotnet run --project tests/ResourceSidebar/ResourceSidebar.csproj -c Release
 ```
 
 - `ThermalBehavior`：独立空间温控器的建筑注册与配置，以及换热方向、功率预算、热容量与温度边界等检查。
 - `SolidGeneration`：固体资源生成器的生产速率、运行条件、设置与无效输入等独立检查，使用替身隔离游戏边界。
 - `LiquidGeneration`：液体资源生成器的生产速率、管道连接与堵塞、缓冲容量、液态温度、设置与资源列表检查，使用替身隔离游戏边界。
 - `FoodGeneration`：食物原料生成器的物品类型、质量与单位换算、生产速率、设置、缺失原料和资源列表检查，使用替身隔离游戏边界。
+- `ResourceSidebar`：执行三个生成器的资源菜单补丁，按当前游戏的分类缓存与回收池行为建模，检查与原版菜单反复切换、刷新时是否出现重复 `Void` 键。
 
 这些检查不能替代游戏内验收；侧栏显示、自动化网络、真实存档读写和 DLC 组合等仍需在游戏中确认。各 Mod 的详细验证范围见对应说明。
 

@@ -34,7 +34,9 @@ namespace FoodResourceGenerator
             // 独立列出已加载的原料，无需先发现；不修改原版共享的资源发现记录。
             var options = new Dictionary<Tag, HashSet<Tag>>
             {
-                [GameTags.Other] = new HashSet<Tag> { GameTags.Void }
+                // FilterSideScreen 单独维护 voidRow，必须与原版使用同一保留分类。
+                // 放进 Other 会让共享侧栏缓存两个 Void 行，刷新时重复加入回收池。
+                [GameTags.Void] = new HashSet<Tag> { GameTags.Void }
             };
             var ingredients = new HashSet<Tag>();
             foreach (Tag tag in FoodResourceSupport.GetIngredients())

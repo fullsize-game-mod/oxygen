@@ -157,9 +157,10 @@ SolidResourceGenerator.GeneratorSolidOptionsPatch.Postfix(filter, ref options);
 Check(options[iron.materialCategory].SetEquals(new[] { iron.tag, unknownSolid.tag }),
     "未发现、未拥有过的固体必须与已发现资源一起按原版类别显示");
 Check(options[ice.materialCategory].SetEquals(new[] { ice.tag }), "未发现资源的新分类必须出现在列表中");
-Check(options[GameTags.Other].SetEquals(new[] { GameTags.Void, uncategorizedSolid.tag }),
-    "必须保留原版无选择项，缺少分类的 Mod 元素归入其他");
-Check(options.Count == 3 && !options.ContainsKey(foodCategory) && !options.ContainsKey(eggCategory) &&
+Check(options[GameTags.Void].SetEquals(new[] { GameTags.Void }) &&
+    options[GameTags.Other].SetEquals(new[] { uncategorizedSolid.tag }),
+    "无选择项必须使用原版保留分类，缺少分类的 Mod 元素归入其他");
+Check(options.Count == 4 && !options.ContainsKey(foodCategory) && !options.ContainsKey(eggCategory) &&
     !options.ContainsKey(liquidCategory), "菜单必须排除食物、蛋、种子、液体及空分类");
 foreach (var element in invalidElements)
     foreach (var resources in options.Values)
