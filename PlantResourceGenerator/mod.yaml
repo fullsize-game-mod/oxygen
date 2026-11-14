@@ -1,0 +1,3 @@
+title: "植物收获物生成器"
+description: "新增植物收获物生成器：自动列出已加载作物的可拾取收获物，包含食用和非食用产物；通电即生成，速度可调 0～100 kg/s（默认 1 kg/s），支持自动化启停，工作耗电 120 W。"
+staticID: "local.PlantResourceGenerator"

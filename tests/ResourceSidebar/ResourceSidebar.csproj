@@ -9,5 +9,6 @@
     <Compile Include="../../SolidResourceGenerator/Patches.cs" Link="SolidPatches.cs" />
     <Compile Include="../../LiquidResourceGenerator/Patches.cs" Link="LiquidPatches.cs" />
     <Compile Include="../../FoodResourceGenerator/Patches.cs" Link="FoodPatches.cs" />
+    <Compile Include="../../PlantResourceGenerator/Patches.cs" Link="PlantPatches.cs" />
   </ItemGroup>
 </Project>

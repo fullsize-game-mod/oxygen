@@ -9,6 +9,7 @@ static Dictionary<Tag, HashSet<Tag>> Options(object generator)
     SolidResourceGenerator.GeneratorSolidOptionsPatch.Postfix(filter, ref options);
     LiquidResourceGenerator.GeneratorLiquidOptionsPatch.Postfix(filter, ref options);
     FoodResourceGenerator.GeneratorFoodOptionsPatch.Postfix(filter, ref options);
+    PlantResourceGenerator.GeneratorPlantOptionsPatch.Postfix(filter, ref options);
     return options;
 }
 
@@ -19,7 +20,8 @@ var vanilla = Options(null);
 var solid = Options(new SolidResourceGenerator.SolidResourceGenerator());
 var liquid = Options(new LiquidResourceGenerator.LiquidResourceGenerator());
 var food = Options(new FoodResourceGenerator.FoodResourceGenerator());
-var menus = new[] { vanilla, solid, liquid, food };
+var plant = Options(new PlantResourceGenerator.PlantResourceGenerator());
+var menus = new[] { vanilla, solid, liquid, food, plant };
 foreach (var first in menus)
 foreach (var second in menus)
 {
@@ -43,7 +45,7 @@ foreach (var menu in menus)
         if (entry.Key != GameTags.Void && entry.Value.Contains(GameTags.Void))
             throw new Exception("The none row cannot also appear in a resource category.");
 }
-Console.WriteLine("PASS: repeated refresh and every switch between vanilla, solid, liquid and food menus; no duplicate recycle keys; canonical none category.");
+Console.WriteLine("PASS: repeated refresh and every switch between vanilla, solid, liquid, food and plant menus; overlapping solid/food harvests; no duplicate recycle keys; canonical none category.");
 
 sealed class SidebarPool
 {
@@ -112,6 +114,17 @@ namespace FoodResourceGenerator
     {
         public static HashSet<Tag> GetIngredients() => new HashSet<Tag> { new Tag("Meat") };
         public static GameObject GetPrefab(Tag tag) => new GameObject();
+    }
+}
+namespace PlantResourceGenerator
+{
+    public class PlantResourceGenerator { }
+    public static class PlantResourceGeneratorConfig { public const string ID = "PlantResourceGenerator"; }
+    public static class PlantResourceSupport
+    {
+        public static HashSet<Tag> GetHarvests() => new HashSet<Tag> { new Tag("Iron"), new Tag("Meat"), new Tag("Flower") };
+        public static Tag GetCategory(Tag tag) => tag.Name == "Iron" ? new Tag("Metal") :
+            tag.Name == "Meat" ? GameTags.CookingIngredient : GameTags.Other;
     }
 }
 namespace HarmonyLib
