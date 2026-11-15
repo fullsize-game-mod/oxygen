@@ -99,6 +99,15 @@ namespace SolidResourceGenerator
     public class SolidResourceGenerator { }
     public static class SolidResourceGeneratorConfig { public const string ID = "SolidResourceGenerator"; }
     public static class SolidResourceSupport { public static bool IsSupported(Tag tag) => tag.Name == "Iron" || tag.Name == "ModSolid"; }
+    public static class ItemResourceSupport
+    {
+        public static Dictionary<Tag, HashSet<Tag>> GetOptions() => new Dictionary<Tag, HashSet<Tag>>
+        {
+            [new Tag("TechComponents")] = new HashSet<Tag> { new Tag("OrbitalResearchDatabank") },
+            [GameTags.CookingIngredient] = new HashSet<Tag> { new Tag("Meat") },
+            [GameTags.Other] = new HashSet<Tag> { new Tag("Flower"), new Tag("AtmoSuit") }
+        };
+    }
 }
 namespace LiquidResourceGenerator
 {

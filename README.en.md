@@ -9,7 +9,7 @@ This repository contains mods for **Oxygen Not Included**, with a separate sourc
 | Mod | Overview | Documentation | Download |
 | --- | --- | --- | --- |
 | Adjustable Space Heater | Adds an independent Space Temperature Controller available from the start without research, with bidirectional −200 to 200°C control | [Usage, settings, and limits](AdjustableSpaceHeater/README.en.md) | [AdjustableSpaceHeater.zip](dist/AdjustableSpaceHeater.zip) |
-| Solid Resource Generator | Adds a powered building that generates a selected solid element at 0–100 kg/s, with automation start/stop control | [Usage, resource support, and limits](SolidResourceGenerator/README.md) (Chinese) | [SolidResourceGenerator.zip](dist/SolidResourceGenerator.zip) |
+| Solid Resource Generator | Generates solid elements at 0–100 kg/s or pickupable items such as data banks at 0–100 items/s, with automation control | [Usage, resource support, and limits](SolidResourceGenerator/README.md) (Chinese) | [SolidResourceGenerator.zip](dist/SolidResourceGenerator.zip) |
 | Liquid Resource Generator | Generates a selected liquid element into liquid pipes, with an adjustable 0–100 kg/s rate limited by pipe capacity and automation start/stop control | [Usage, pipe output, and limits](LiquidResourceGenerator/README.md) (Chinese) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
 | Food Resource Generator | Discovers item ingredients from loaded food recipes and generates them at 0–100 kg/s, with DLC, mod recipe, and automation support | [Usage, ingredients, and limits](FoodResourceGenerator/README.md) (Chinese) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
 | Plant Resource Generator | Discovers edible and nonfood crop harvests from loaded plants and generates them at 0–100 kg/s, with automation support | [Usage, harvests, and limits](PlantResourceGenerator/README.md) (Chinese) | [PlantResourceGenerator.zip](dist/PlantResourceGenerator.zip) |
@@ -97,7 +97,7 @@ dotnet run --project tests/ResourceSidebar/ResourceSidebar.csproj -c Release
 ```
 
 - `ThermalBehavior`: independent controller registration and configuration, plus heat-exchange direction, power budget, heat capacity, and temperature boundaries.
-- `SolidGeneration`: isolated Solid Resource Generator checks, including production rate, operating conditions, settings, and invalid inputs, using test doubles at game boundaries.
+- `SolidGeneration`: isolated solid and item production checks, including data bank identity, whole equipment units, fractional progress, rates, settings, operating conditions, invalid inputs, and resource menus, using test doubles at game boundaries.
 - `LiquidGeneration`: isolated Liquid Resource Generator checks for production rate, pipe connection/blockage, buffer capacity, liquid temperatures, settings, and resource lists, using test doubles at game boundaries.
 - `FoodGeneration`: isolated Food Resource Generator checks for item identity, mass/unit conversion, production rate, settings, unavailable ingredients, and resource lists, using test doubles at game boundaries.
 - `PlantGeneration`: crop harvest discovery, nonfood harvests and harvest seeds, mass conversion, production settings, invalid prefabs, and menu isolation, using test doubles at game boundaries.

@@ -32,7 +32,7 @@ namespace SolidResourceGenerator
             if (__instance.GetComponent<SolidResourceGenerator>() == null)
                 return;
 
-            // 单独构建完整元素列表，不把未发现元素写入原版可能共享的发现记录。
+            // 独立构建元素与物品列表，不改动原版发现记录。
             // 固定使用原版保留的 Void 分类，不能将“无选择”行混入资源分类。
             // 共享侧栏会缓存分类中的行，跨分类重复的 Void 会导致回收池键冲突。
             var options = new Dictionary<Tag, HashSet<Tag>>
@@ -52,6 +52,15 @@ namespace SolidResourceGenerator
                     options.Add(category, resources);
                 }
                 resources.Add(element.tag);
+            }
+            foreach (var entry in ItemResourceSupport.GetOptions())
+            {
+                if (!options.TryGetValue(entry.Key, out var resources))
+                {
+                    resources = new HashSet<Tag>();
+                    options.Add(entry.Key, resources);
+                }
+                resources.UnionWith(entry.Value);
             }
             __result = options;
         }
