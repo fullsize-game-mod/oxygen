@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ResourceGenerators;
 using UnityEngine;
 
 namespace SolidResourceGenerator
@@ -36,11 +37,7 @@ namespace SolidResourceGenerator
             // 不缓存初始化中的结果，已加载 DLC 和其他 Mod 后注册的物品也可出现。
             var harvests = new HashSet<Tag>();
             foreach (GameObject plant in Assets.GetPrefabsWithComponent<Crop>())
-            {
-                Crop crop = plant.GetComponent<Crop>();
-                if (crop != null && crop.cropVal.numProduced > 0 && !string.IsNullOrEmpty(crop.cropVal.cropId))
-                    harvests.Add(new Tag(crop.cropVal.cropId));
-            }
+                harvests.UnionWith(CropProducts.GetTags(plant.GetComponent<Crop>()));
 
             var options = new Dictionary<Tag, HashSet<Tag>>();
             foreach (GameObject prefab in Assets.GetPrefabsWithComponent<Pickupable>())

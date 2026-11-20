@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ResourceGenerators;
 using UnityEngine;
 
 namespace PlantResourceGenerator
@@ -12,13 +13,11 @@ namespace PlantResourceGenerator
             var harvests = new HashSet<Tag>();
             foreach (GameObject plant in Assets.GetPrefabsWithComponent<Crop>())
             {
-                Crop crop = plant.GetComponent<Crop>();
-                if (crop == null || string.IsNullOrEmpty(crop.cropVal.cropId) || crop.cropVal.numProduced <= 0)
-                    continue;
-
-                var tag = new Tag(crop.cropVal.cropId);
-                if (GetSupportedPrefab(tag) != null)
-                    harvests.Add(tag);
+                foreach (Tag tag in CropProducts.GetTags(plant.GetComponent<Crop>()))
+                {
+                    if (GetSupportedPrefab(tag) != null)
+                        harvests.Add(tag);
+                }
             }
             return harvests;
         }
@@ -32,10 +31,11 @@ namespace PlantResourceGenerator
             // 生产时只验证所选产物，避免每台建筑每 200 ms 构建完整的收获物集合。
             foreach (GameObject plant in Assets.GetPrefabsWithComponent<Crop>())
             {
-                Crop crop = plant.GetComponent<Crop>();
-                if (crop != null && crop.cropVal.numProduced > 0 &&
-                    !string.IsNullOrEmpty(crop.cropVal.cropId) && new Tag(crop.cropVal.cropId) == tag)
-                    return prefab;
+                foreach (Tag harvest in CropProducts.GetTags(plant.GetComponent<Crop>()))
+                {
+                    if (harvest == tag)
+                        return prefab;
+                }
             }
             return null;
         }

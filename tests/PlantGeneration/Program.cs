@@ -24,9 +24,10 @@ static GameObject Item(string id, float massPerUnit = 1f, bool edible = false, b
     Assets.Prefabs[new Tag(id)] = prefab;
     return prefab;
 }
-static Crop Plant(string id, string harvest, int count = 1)
+static Crop Plant(string id, string harvest, float count = 1f)
 {
-    var crop = new Crop { cropVal = new Crop.CropVal { cropId = harvest, numProduced = count } };
+    var crop = new Crop { cropVal = new Crop.CropVal() };
+    crop.cropVal.products.Add(new Crop.CropVal.ProductInfo { cropId = harvest, quantity = count });
     var plant = new GameObject();
     plant.Components.Add(crop);
     Assets.Prefabs[new Tag(id)] = plant;
@@ -53,7 +54,7 @@ Plant("ColdWheat", "ColdWheatSeed", 18);
 Plant("BeanPlant", "BeanPlantSeed", 12);
 Plant("SwampLily", "SwampLilyFlower");
 Plant("ArborTreeBranch", "WoodLog", 300);
-Plant("FiberPlant", "BasicFabric", 2);
+berryCrop.cropVal.products.Add(new Crop.CropVal.ProductInfo { cropId = "BasicFabric", quantity = 0.25f });
 Plant("MissingDlcPlant", "MissingDlcHarvest");
 Plant("NoHarvest", "");
 Plant("NullHarvest", null);
@@ -70,11 +71,12 @@ ElementLoader.Elements[new Tag("PrickleFruit")] = new Element { tag = new Tag("W
 
 var expected = new HashSet<Tag>(new[] { "PrickleFruit", "ColdWheatSeed", "BeanPlantSeed", "SwampLilyFlower", "WoodLog", "BasicFabric" }.Select(id => new Tag(id)));
 Check(Support.GetHarvests().SetEquals(expected), "只列出实际加载且可拾取的作物收获物，去重并包含非食用产物及收获种子");
+Check(Support.GetPrefab(new Tag("BasicFabric")) != null, "U60 多产物作物的非首个收获物也可生产，小数产量不能被舍入为零");
 var modCrop = Plant("ModPlant", "ModHarvest");
 Check(Support.GetHarvests().Contains(new Tag("ModHarvest")), "初始化后注册的 Mod 作物必须可见");
-modCrop.cropVal.cropId = "MissingDlcHarvest";
+modCrop.cropVal.products[0] = new Crop.CropVal.ProductInfo { cropId = "MissingDlcHarvest", quantity = 1f };
 Check(Support.GetPrefab(new Tag("ModHarvest")) == null, "作物配置移除产物后不能保留过期缓存");
-modCrop.cropVal.cropId = "ModHarvest";
+modCrop.cropVal.products[0] = new Crop.CropVal.ProductInfo { cropId = "ModHarvest", quantity = 1f };
 expected.Add(new Tag("ModHarvest"));
 
 var operational = new Operational();
@@ -287,7 +289,11 @@ public static class Assets
 public class Crop
 {
     public CropVal cropVal;
-    public struct CropVal { public string cropId; public int numProduced; }
+    public class CropVal
+    {
+        public List<ProductInfo> products = new();
+        public struct ProductInfo { public string cropId; public float quantity; }
+    }
 }
 public class Element { public Tag tag, materialCategory; public bool IsSolid = true, disabled; public float highTemp = 1000f; }
 public static class ElementLoader

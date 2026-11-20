@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Program.cs" />
+    <Compile Include="../../Shared/CropProducts.cs" Link="CropProducts.cs" />
     <Compile Include="../../PlantResourceGenerator/PlantResourceGenerator.cs" Link="PlantResourceGenerator.cs" />
     <Compile Include="../../PlantResourceGenerator/PlantResourceSupport.cs" Link="PlantResourceSupport.cs" />
     <Compile Include="../../PlantResourceGenerator/Patches.cs" Link="Patches.cs" />
