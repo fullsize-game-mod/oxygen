@@ -1,0 +1,3 @@
+title: "电解器：纯氧 / 纯氢 20°C"
+description: "原版电解器可在建筑侧栏切换纯氧或纯氢，每台单独保存设置。两种模式均以 20°C、1 kg/s 排气，超压不停机，耗水和耗电保持原版。"
+staticID: "Local.OxygenOnly20C"
