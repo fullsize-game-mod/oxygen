@@ -9,6 +9,7 @@ namespace FoodPowerGenerator
         public const string ID = "FoodPowerGenerator";
         internal const int Watts = 600;
         internal const int StorageCapacityKg = 20;
+        private const int RotStorageCapacityKg = 5;
 
         public override BuildingDef CreateBuildingDef()
         {
@@ -45,6 +46,24 @@ namespace FoodPowerGenerator
             Prioritizable.AddRef(go);
             go.GetComponent<KPrefabID>().AddTag(RoomConstraints.ConstraintTags.IndustrialMachinery, false);
             go.AddOrGet<LoopingSounds>();
+
+            // 单独配送腐烂物，避免把整个有机物分类加进食物筛选，或挤占食物库存。
+            var rotStorage = go.AddComponent<Storage>();
+            rotStorage.capacityKg = RotStorageCapacityKg;
+            rotStorage.showInUI = true;
+            rotStorage.allowItemRemoval = true;
+            go.AddOrGet<FoodPowerGenerator>().rotStorage = rotStorage;
+
+            var rotDelivery = go.AddOrGet<ManualDeliveryKG>();
+            rotDelivery.SetStorage(rotStorage);
+            rotDelivery.RequestedItemTag = FoodPowerGenerator.RotPileTag;
+            rotDelivery.capacity = RotStorageCapacityKg;
+            rotDelivery.refillMass = 1f;
+            rotDelivery.MinimumMass = 0f;
+            rotDelivery.operationalRequirement = Operational.State.Operational;
+            rotDelivery.allowPause = true;
+            rotDelivery.ShowStatusItem = false;
+            rotDelivery.choreTypeIDHash = Db.Get().ChoreTypes.PowerFetch.IdHash;
         }
 
         public override void DoPostConfigureComplete(GameObject go)

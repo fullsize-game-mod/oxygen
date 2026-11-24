@@ -7,9 +7,9 @@ namespace FoodPowerGenerator
         public override void OnLoad(Harmony harmony)
         {
             Strings.Add("STRINGS.BUILDINGS.PREFABS.FOODPOWERGENERATOR.NAME", "食物发电器");
-            Strings.Add("STRINGS.BUILDINGS.PREFABS.FOODPOWERGENERATOR.DESC", "把复制人能吃的食物转化为电力。热量越高，同样多的食物能发的电越多。");
+            Strings.Add("STRINGS.BUILDINGS.PREFABS.FOODPOWERGENERATOR.DESC", "把食物或腐烂物转化为电力，优先消耗腐烂物。");
             Strings.Add("STRINGS.BUILDINGS.PREFABS.FOODPOWERGENERATOR.EFFECT",
-                $"在侧栏勾选供料的食物，由复制人搬入。每千卡产生 {FoodPowerGenerator.JoulesPerKilocalorie} J，额定功率 {FoodPowerGeneratorConfig.Watts} W。接入电路后有食物即运转；可用自动化红灯停机。");
+                $"复制人会搬入腐烂物，以及在侧栏勾选的食物。腐烂物每千克产生 {FoodPowerGenerator.JoulesPerRotKg} J，食物每千卡产生 {FoodPowerGenerator.JoulesPerKilocalorie} J，额定功率 {FoodPowerGeneratorConfig.Watts} W。接入电路后有燃料即运转；可用自动化红灯停机。");
             base.OnLoad(harmony);
         }
     }

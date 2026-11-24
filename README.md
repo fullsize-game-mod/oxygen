@@ -13,7 +13,7 @@
 | 液体资源生成器 | 新增通电生成指定液体元素并经液体管道输出的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、管道输出与限制](LiquidResourceGenerator/README.md) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
 | 食物原料生成器 | 自动列出已加载食物配方使用的物品原料，通电生成，速度可调 0～100 kg/s，支持 DLC、其他 Mod 与自动化启停 | [使用、原料范围与限制](FoodResourceGenerator/README.md) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
 | 植物收获物生成器 | 自动列出已加载作物的食用和非食用收获物，通电生成，速度可调 0～100 kg/s，支持自动化启停 | [使用、收获物范围与限制](PlantResourceGenerator/README.md) | [PlantResourceGenerator.zip](dist/PlantResourceGenerator.zip) |
-| 食物发电器 | 复制人搬入选定食物，每千卡生成 10 J，额定 600 W，支持自动化启停 | [供料、换算与限制](FoodPowerGenerator/README.md) | [FoodPowerGenerator.zip](dist/FoodPowerGenerator.zip) |
+| 食物发电器 | 消耗所选食物（10 J/千卡）或腐烂物（600 J/kg）发电，额定 600 W，支持自动化启停 | [供料、换算与限制](FoodPowerGenerator/README.md) | [FoodPowerGenerator.zip](dist/FoodPowerGenerator.zip) |
 
 各 Mod 的版本、配置、使用方式和验证范围以对应目录中的说明为准。目前尚未完成游戏内验收，使用前请备份存档。
 
