@@ -13,6 +13,7 @@
 | 液体资源生成器 | 新增通电生成指定液体元素并经液体管道输出的建筑，速度可调 0～100 kg/s，支持自动化启停 | [使用、管道输出与限制](LiquidResourceGenerator/README.md) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
 | 食物原料生成器 | 自动列出已加载食物配方使用的物品原料，通电生成，速度可调 0～100 kg/s，支持 DLC、其他 Mod 与自动化启停 | [使用、原料范围与限制](FoodResourceGenerator/README.md) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
 | 植物收获物生成器 | 自动列出已加载作物的食用和非食用收获物，通电生成，速度可调 0～100 kg/s，支持自动化启停 | [使用、收获物范围与限制](PlantResourceGenerator/README.md) | [PlantResourceGenerator.zip](dist/PlantResourceGenerator.zip) |
+| 食物发电器 | 复制人搬入选定食物，每千卡生成 10 J，额定 600 W，支持自动化启停 | [供料、换算与限制](FoodPowerGenerator/README.md) | [FoodPowerGenerator.zip](dist/FoodPowerGenerator.zip) |
 
 各 Mod 的版本、配置、使用方式和验证范围以对应目录中的说明为准。目前尚未完成游戏内验收，使用前请备份存档。
 
@@ -28,7 +29,7 @@
 | macOS | `~/Library/Application Support/unity.Klei.Oxygen Not Included/mods/Local/` |
 | Linux | `~/.config/unity3d/Klei/Oxygen Not Included/mods/Local/` |
 
-Windows 的文档目录若被 OneDrive 等重定向，以实际文档目录为准。以同时安装五个 Mod 为例，目录层级应为：
+Windows 的文档目录若被 OneDrive 等重定向，以实际文档目录为准。以同时安装所有 Mod 为例，目录层级应为：
 
 ```text
 mods/Local/
@@ -48,8 +49,12 @@ mods/Local/
 │   ├── FoodResourceGenerator.dll
 │   ├── mod.yaml
 │   └── mod_info.yaml
-└── PlantResourceGenerator/
-    ├── PlantResourceGenerator.dll
+├── PlantResourceGenerator/
+│   ├── PlantResourceGenerator.dll
+│   ├── mod.yaml
+│   └── mod_info.yaml
+└── FoodPowerGenerator/
+    ├── FoodPowerGenerator.dll
     ├── mod.yaml
     └── mod_info.yaml
 ```
@@ -77,6 +82,7 @@ dotnet build SolidResourceGenerator/SolidResourceGenerator.csproj -c Release "-p
 dotnet build LiquidResourceGenerator/LiquidResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build FoodResourceGenerator/FoodResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build PlantResourceGenerator/PlantResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
+dotnet build FoodPowerGenerator/FoodPowerGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 ```
 
 也可以通过环境变量 `ONI_MANAGED_PATH` 指定该目录。首次构建需要联网还原 `Lib.Harmony.Ref` 2.4.2 编译引用；游戏负责提供运行时依赖。
@@ -108,7 +114,7 @@ dotnet run --project tests/ResourceSidebar/ResourceSidebar.csproj -c Release
 
 ## 兼容性
 
-当前五个 Mod 均以 `netstandard2.1` 为目标框架，引用 Harmony 2.4.2；各自的 `mod_info.yaml` 声明 `minimumSupportedBuild: 718946`、`APIVersion: 2`。这些配置不代表已在对应游戏版本完成实测。游戏更新后，应使用当前游戏程序集重新编译并进行游戏内验证。
+当前各 Mod 均以 `netstandard2.1` 为目标框架，引用 Harmony 2.4.2；各自的 `mod_info.yaml` 声明 `minimumSupportedBuild: 718946`、`APIVersion: 2`。这些配置不代表已在对应游戏版本完成实测。游戏更新后，应使用当前游戏程序集重新编译并进行游戏内验证。
 
 ## 项目结构
 
@@ -121,6 +127,7 @@ dotnet run --project tests/ResourceSidebar/ResourceSidebar.csproj -c Release
 ├── LiquidResourceGenerator/          # 液体资源生成器源码与详细说明
 ├── FoodResourceGenerator/            # 食物原料生成器源码与详细说明
 ├── PlantResourceGenerator/           # 植物收获物生成器源码与详细说明
+├── FoodPowerGenerator/               # 食物发电器源码与详细说明
 ├── tests/
 │   ├── ThermalBehavior/              # 换热计算检查
 │   ├── SolidGeneration/              # 固体资源生产检查

@@ -13,6 +13,7 @@ This repository contains mods for **Oxygen Not Included**, with a separate sourc
 | Liquid Resource Generator | Generates a selected liquid element into liquid pipes, with an adjustable 0–100 kg/s rate limited by pipe capacity and automation start/stop control | [Usage, pipe output, and limits](LiquidResourceGenerator/README.md) (Chinese) | [LiquidResourceGenerator.zip](dist/LiquidResourceGenerator.zip) |
 | Food Resource Generator | Discovers item ingredients from loaded food recipes and generates them at 0–100 kg/s, with DLC, mod recipe, and automation support | [Usage, ingredients, and limits](FoodResourceGenerator/README.md) (Chinese) | [FoodResourceGenerator.zip](dist/FoodResourceGenerator.zip) |
 | Plant Resource Generator | Discovers edible and nonfood crop harvests from loaded plants and generates them at 0–100 kg/s, with automation support | [Usage, harvests, and limits](PlantResourceGenerator/README.md) (Chinese) | [PlantResourceGenerator.zip](dist/PlantResourceGenerator.zip) |
+| Food Power Generator | Converts selected food delivered by duplicants into electricity at 10 J/kcal, rated at 600 W, with automation control | [Fuel, conversion, and limits](FoodPowerGenerator/README.md) (Chinese) | [FoodPowerGenerator.zip](dist/FoodPowerGenerator.zip) |
 
 See each mod's documentation for its version, settings, usage, and validation scope. In-game acceptance testing has not been completed; back up your saves before use. In-game mod names and custom strings are currently in Chinese.
 
@@ -28,7 +29,7 @@ See each mod's documentation for its version, settings, usage, and validation sc
 | macOS | `~/Library/Application Support/unity.Klei.Oxygen Not Included/mods/Local/` |
 | Linux | `~/.config/unity3d/Klei/Oxygen Not Included/mods/Local/` |
 
-If Windows redirects Documents through OneDrive or another service, use the actual Documents location. With all five mods installed, the layout should be:
+If Windows redirects Documents through OneDrive or another service, use the actual Documents location. With all mods installed, the layout should be:
 
 ```text
 mods/Local/
@@ -48,8 +49,12 @@ mods/Local/
 │   ├── FoodResourceGenerator.dll
 │   ├── mod.yaml
 │   └── mod_info.yaml
-└── PlantResourceGenerator/
-    ├── PlantResourceGenerator.dll
+├── PlantResourceGenerator/
+│   ├── PlantResourceGenerator.dll
+│   ├── mod.yaml
+│   └── mod_info.yaml
+└── FoodPowerGenerator/
+    ├── FoodPowerGenerator.dll
     ├── mod.yaml
     └── mod_info.yaml
 ```
@@ -77,6 +82,7 @@ dotnet build SolidResourceGenerator/SolidResourceGenerator.csproj -c Release "-p
 dotnet build LiquidResourceGenerator/LiquidResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build FoodResourceGenerator/FoodResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 dotnet build PlantResourceGenerator/PlantResourceGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
+dotnet build FoodPowerGenerator/FoodPowerGenerator.csproj -c Release "-p:GameManagedPath=/absolute/path/to/Managed"
 ```
 
 Alternatively, set the `ONI_MANAGED_PATH` environment variable. The first build needs internet access to restore the `Lib.Harmony.Ref` 2.4.2 compile-time reference. The game supplies runtime dependencies.
@@ -107,7 +113,7 @@ These checks do not replace in-game acceptance testing. Sidebar rendering, autom
 
 ## Compatibility
 
-All five mods currently target `netstandard2.1` and reference Harmony 2.4.2. Each `mod_info.yaml` declares `minimumSupportedBuild: 718946` and `APIVersion: 2`. These settings do not establish successful in-game testing on that build. After game updates, rebuild against the current game assemblies and validate in-game behavior.
+All mods currently target `netstandard2.1` and reference Harmony 2.4.2. Each `mod_info.yaml` declares `minimumSupportedBuild: 718946` and `APIVersion: 2`. These settings do not establish successful in-game testing on that build. After game updates, rebuild against the current game assemblies and validate in-game behavior.
 
 ## Project structure
 
@@ -120,6 +126,7 @@ All five mods currently target `netstandard2.1` and reference Harmony 2.4.2. Eac
 ├── LiquidResourceGenerator/          # Liquid generator mod source and documentation
 ├── FoodResourceGenerator/            # Food ingredient generator source and documentation
 ├── PlantResourceGenerator/           # Plant harvest generator source and documentation
+├── FoodPowerGenerator/               # Food power generator source and documentation
 ├── tests/
 │   ├── ThermalBehavior/              # Thermal calculation checks
 │   ├── SolidGeneration/              # Solid production checks
